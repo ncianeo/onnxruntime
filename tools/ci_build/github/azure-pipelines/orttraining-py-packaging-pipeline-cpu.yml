@@ -36,6 +36,8 @@ stages:
         displayName: 'check variables'
         inputs:
           script: |
+            echo "isMain is "${{ variables['Build.SourceBranch'] }} && \
+            echo "isMain is "${{ variables['isMain'] }} && \
             echo "final_storage is "${{ variables['finalStorage'] }}
 
       - checkout: self
