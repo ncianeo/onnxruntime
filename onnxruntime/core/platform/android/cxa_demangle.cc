@@ -13,7 +13,7 @@
 #define DEMANGLE_SUCCESS 0
 
 // Reduced from https://github.com/llvm/llvm-project/blob/dbd80d7d27/libcxxabi/src/demangle/Utility.h
-inline bool initialize_output_buffer(char*& buf, size_t* n, size_t& buf_size, size_t init_size) {
+static inline bool initialize_output_buffer(char*& buf, size_t* n, size_t& buf_size, size_t init_size) {
   // only handle buf == null case, is buf is provided, in original impl, it realloc to expand buf space.
   // we don't handle the expansion, instead, the name copied to buf will be truncated.
   if (buf == nullptr) {
