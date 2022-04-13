@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #if USE_DUMMY_EXA_DEMANGLE
 
 #include <stdlib.h>
@@ -9,7 +12,7 @@
 #define DEMANGLE_MEMORY_ALLOCATION_FAILURE -1
 #define DEMANGLE_SUCCESS 0
 
-// Reduced from https://github.com/llvm/llvm-project/blob/09c2b7c35a/libcxxabi/src/demangle/Utility.h
+// Reduced from https://github.com/llvm/llvm-project/blob/dbd80d7d27/libcxxabi/src/demangle/Utility.h
 inline bool initialize_output_buffer(char*& buf, size_t* n, size_t& buf_size, size_t init_size) {
   // only handle buf == null case, is buf is provided, in original impl, it realloc to expand buf space.
   // we don't handle the expansion, instead, the name copied to buf will be truncated.
