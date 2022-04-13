@@ -32,6 +32,12 @@ stages:
             PythonVersion: '3.9'
 
       steps:
+      - task: CmdLine@2
+        displayName: 'check variables'
+        inputs:
+          script: |
+            echo "final_storage is "${{ variables['finalStorage'] }}
+
       - checkout: self
         clean: true
         submodules: recursive
@@ -93,6 +99,7 @@ stages:
           script: |
             files=($(Build.ArtifactStagingDirectory)/Release/dist/*.whl) && \
             echo ${files[0]} && \
+            echo ${{ variables['finalStorage'] }} && \
             tools/ci_build/upload_python_package_to_azure_storage.py \
                 --python_wheel_path ${files[0]} ${{ variables['finalStorage'] }}
 
