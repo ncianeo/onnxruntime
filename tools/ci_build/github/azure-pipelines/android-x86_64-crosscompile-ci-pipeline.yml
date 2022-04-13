@@ -261,6 +261,7 @@ jobs:
         --android_abi=x86_64 \
         --android_api=29 \
         --use_nnapi \
+        --build_shared_lib \
         --test
       displayName: NNAPI EP, Test, CodeCoverage on Android Emulator
 
