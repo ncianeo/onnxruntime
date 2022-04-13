@@ -96,20 +96,7 @@ class CUDAExecutionProvider : public IExecutionProvider {
 
   std::unique_ptr<profiling::EpProfiler> GetProfiler() override;
 
-  void LegalizeSessionOptions(SessionOptions& so) override {
-    // Parallel execution mode does not support the CUDA EP
-    if (so.execution_mode != ExecutionMode::ORT_SEQUENTIAL) {
-      LOGS(*session_logger_, WARNING)
-          << "Parallel execution mode does not support the CUDA Execution Provider. "
-          << "So making the execution mode sequential for this session since it uses the CUDA Execution Provider.";
-      so.execution_mode = ExecutionMode::ORT_SEQUENTIAL;
-    }
-
-    auto trt_ep = execution_providers_.Get(kTensorrtExecutionProvider);
-    if (trt_ep) {
-      ORT_RETURN_IF_ERROR(p_exec_provider->SetComputeStream(trt_ep->GetComputeStream()));
-    }
-  }
+  void LegalizeSessionOptions(SessionOptions& session_options, const logging::Logger& logger) override;
 
 #if defined(CUDA_VERSION) && CUDA_VERSION >= 10000
   bool IsGraphCaptureEnabled() const override;

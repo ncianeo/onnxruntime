@@ -471,7 +471,7 @@ common::Status InferenceSession::RegisterExecutionProvider(const std::shared_ptr
 
   const std::string& provider_type = p_exec_provider->Type();
 
-  p_exec_provider->LegalizeSessionOptions(session_options_);
+  p_exec_provider->LegalizeSessionOptions(session_options_, *session_logger_);
   p_exec_provider->RegisterAllocator(allocator_manager_);
 
   if (provider_type == onnxruntime::kCudaExecutionProvider) {

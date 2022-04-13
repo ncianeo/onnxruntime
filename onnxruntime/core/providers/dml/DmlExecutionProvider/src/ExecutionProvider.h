@@ -103,14 +103,14 @@ namespace Dml
             bool isInternalOperator,
             IUnknown* data,
             IUnknown** abiData) const override;
-                
+
        uint64_t TryGetPooledAllocationId(
             IUnknown* data,
             bool isInternalOperator) override;
 
         void GetABIExecutionInterface(
             bool isInternalOperator,
-            IUnknown** abiExecutionObject) const override; 
+            IUnknown** abiExecutionObject) const override;
 
         bool TransitionsRequiredForOperator(
             bool isInternalOperator
@@ -127,27 +127,27 @@ namespace Dml
 
         void SetDefaultRoundingMode(AllocatorRoundingMode roundingMode);
 
-        // Waits for flushed work, discards unflushed work, and discards associated references to 
+        // Waits for flushed work, discards unflushed work, and discards associated references to
         // prevent circular references.  Must be the last call on the object before destruction.
-        void Close() override;   
+        void Close() override;
 
         void WaitForOutstandingWork();
-            
+
         // Allocate a resource from pools.  Releasing pooledResource returns it to the pool.
         STDMETHOD(AllocatePooledResource)(
             size_t size,
             AllocatorRoundingMode roundingMode,
-            ID3D12Resource **d3dResource, 
+            ID3D12Resource **d3dResource,
             IUnknown* *pooledResource
         ) const noexcept final;
-        
+
         STDMETHOD_(ID3D12Resource*, DecodeResource)(void* allocation) const noexcept final;
 
         std::shared_ptr<onnxruntime::KernelRegistry> GetKernelRegistry() const
         {
             return m_kernelRegistry;
         }
-        
+
         STDMETHOD_(bool, IsMcdmDevice)() const noexcept final;
 
         STDMETHOD_(bool, MetacommandsEnabled)() const noexcept final;
@@ -155,10 +155,11 @@ namespace Dml
         std::shared_ptr<onnxruntime::IAllocator> GetCpuInputAllocator();
         std::shared_ptr<onnxruntime::IAllocator> GetCpuOutputAllocator();
 
-        std::shared_ptr<const Windows::AI::MachineLearning::Adapter::InternalRegistrationInfoMap> 
-        GetInternalRegistrationInfoMap() const;        
-        
+        std::shared_ptr<const Windows::AI::MachineLearning::Adapter::InternalRegistrationInfoMap>
+        GetInternalRegistrationInfoMap() const;
+
         onnxruntime::common::Status OnSessionInitializationEnd();
+        void LegalizeSessionOptions(onnxruntime::SessionOptions& so, const onnxruntime::logging::Logger& logger);
 
     private:
         void Initialize(ID3D12CommandQueue* queue, ExecutionProvider& executionProvider);
@@ -199,8 +200,8 @@ namespace Dml
             assert(exec_queue_id == 0);
             return m_impl->CopyTensor(src, dst);
         }
-        
-        onnxruntime::common::Status CopyTensors(const std::vector<onnxruntime::IDataTransfer::SrcDstPair>& src_dst_pairs) const 
+
+        onnxruntime::common::Status CopyTensors(const std::vector<onnxruntime::IDataTransfer::SrcDstPair>& src_dst_pairs) const
         {
             return m_impl->CopyTensors(src_dst_pairs);
         }
@@ -226,7 +227,7 @@ namespace Dml
             ID3D12CommandQueue* commandQueue,
             bool enableMetacommands = true
         );
-        
+
         std::unique_ptr<onnxruntime::IDataTransfer> GetDataTransfer() const final override
         {
             return std::make_unique<DataTransfer>(m_impl.Get());
@@ -247,7 +248,7 @@ namespace Dml
                 const std::vector<const onnxruntime::KernelRegistry*>& kernel_registries) const final override;
 
         onnxruntime::common::Status OnSessionInitializationEnd() override
-        { 
+        {
             return m_impl->OnSessionInitializationEnd();
         }
 
@@ -267,42 +268,26 @@ namespace Dml
             return Status::OK();
         }
 
-        virtual void LegalizeSessionOptions(onnxruntime::SessionOptions& so) final override
+        virtual void LegalizeSessionOptions(onnxruntime::SessionOptions& so, const onnxruntime::logging::Logger& logger) final override
         {
-            // DML's memory is not byte addressable and hence mem pattern doesn't work.
-            if (session_options_.enable_mem_pattern)
-            {
-                LOGS(*session_logger_, WARNING)
-                    << "Having memory pattern enabled is not supported while using the DML Execution Provider. "
-                    << "So disabling it for this session since it uses the DML Execution Provider.";
-                session_options_.enable_mem_pattern = false;
-            }
-
-            // Parallel execution mode does not support DML EP
-            if (session_options_.execution_mode != ExecutionMode::ORT_SEQUENTIAL)
-            {
-                LOGS(*session_logger_, WARNING)
-                    << "Parallel execution mode does not support the DML Execution Provider. "
-                    << "So making the execution mode sequential for this session since it uses the DML Execution Provider.";
-                session_options_.execution_mode = ExecutionMode::ORT_SEQUENTIAL;
-            }
+            m_impl->LegalizeSessionOptions(so, logger);
         }
 
         void Flush()
         {
             return m_impl->Flush();
-        }    
-        
+        }
+
         void SetDefaultRoundingMode(AllocatorRoundingMode roundingMode)
         {
             return m_impl->SetDefaultRoundingMode(roundingMode);
         }
-        
+
         void ReleaseCompletedReferences()
         {
             return m_impl->ReleaseCompletedReferences();
         }
-        
+
         ExecutionProviderImpl* GetImpl()
         {
             return m_impl.Get();
