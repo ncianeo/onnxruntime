@@ -11,6 +11,7 @@
 #include "core/common/logging/logging.h"
 #include "core/common/status.h"
 #include "core/framework/data_transfer.h"
+#include "core/framework/session_options.h"
 #include "core/framework/tensor.h"
 
 namespace onnxruntime {
@@ -302,11 +303,9 @@ class IExecutionProvider {
    * The EP should alter the SessionOptions object fit its implementation to avoid potential crash.
    * Rather than put the onus on the user to know these, make the appropriate change while logging the change.
    *
-   * @param so The SessionOptions object to be altered
+   * @param session_options The SessionOptions object to be altered
    */
-  virtual void LegalizeSessionOptions(SessionOptions& so) {
-    ORT_UNUSED_PARAMETER(so);
-  }
+  virtual void LegalizeSessionOptions(SessionOptions&) {}
 
  private:
   const std::string type_;
